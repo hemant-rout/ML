@@ -1,0 +1,92 @@
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions._
+
+import scala.collection.mutable.ListBuffer
+
+case class DataSetInfo(numVariables:Int,numObservation:Int,numeric:Int,categorical:Int,boolean:Int,date:Int)
+object DataProfiling {
+  def main(args: Array[String]): Unit = {
+    val spark: SparkSession = getSparkSession()
+
+
+    val df=spark.read.option("header","true").option("inferSchema","true").csv("C:\\Users\\Hemant\\GitHub\\SparkPractice\\data\\1000_movies_data.csv")
+        .withColumn("Year",col("Year").cast("integer"))
+      .withColumn("Runtime (Minutes)",col("Runtime (Minutes)").cast("integer"))
+      .withColumn("Rating",col("Rating").cast("integer"))
+      .withColumn("Votes",col("Votes").cast("double"))
+
+    val schemaDetails=df.dtypes
+
+
+
+    val listBuffNumeric= new ListBuffer[String]()
+    val listBuffDate= new ListBuffer[String]()
+    val listBuffBoolean= new ListBuffer[String]()
+    val listBuffString= new ListBuffer[String]()
+    schemaDetails.foreach(dt=>
+    dt match {
+      case (_,"IntegerType")| (_,"LongType")|(_,"ShortType")|(_,"ByteType")|
+           (_,"FloatType")| (_,"DoubleType")|(_,"DecimalType")
+      => listBuffNumeric += dt._1
+      case (_,"DateType")| (_,"TimeStampType")=> listBuffDate += dt._1
+      case (_,"StringType")=> listBuffString += dt._1
+      case (_,"BooleanType")=> listBuffBoolean += dt._1
+    })
+
+
+    val numVariables = schemaDetails.length
+    val numeric = listBuffNumeric.length
+    val categorical = listBuffString.length
+    val date = listBuffDate.length
+    val boolean = listBuffBoolean.length
+    val numObservation = df.count()
+
+    listBuffNumeric.foreach(f=>getColumnDetails(df.na.drop("any"),f).show())
+
+
+    System.exit(0)
+    println("Num Variables "+numVariables)
+    df.printSchema()
+    df.show()
+
+  }
+
+  def getSparkSession(): SparkSession = {
+    SparkSession.builder().appName("sparkTest").config("spark.tmp.warehouse", "file:///tmp").master("local").getOrCreate()
+  }
+
+  def getColumnDetails(df:DataFrame,fieldName:String): DataFrame ={
+    val df1=df.select(fieldName).agg(
+      min(col(fieldName)).alias("min"),
+      max(col(fieldName)).alias("max"),
+      sum(col(fieldName)).alias("sum"),
+      count(col(fieldName)).alias("count"),
+      countDistinct(col(fieldName)).alias("countDistinct"),
+      avg(col(fieldName)).alias("avg"),
+      mean(col(fieldName)).alias("mean"),
+      variance(col(fieldName)).alias("variance"),
+      stddev(col(fieldName)).alias("std"),
+      kurtosis(col(fieldName)).alias("kurtosis"),
+      skewness(col(fieldName)).alias("skewness")
+    )
+
+    val quantiles=df.stat.approxQuantile(fieldName,
+      Array(0.25,0.5,0.75),0.0)
+
+    val Q1 = quantiles(0)
+    val Q3 = quantiles(1)
+    val IQR = Q3 - Q1
+
+    val lowerRange = Q1 - 1.5*IQR
+    val upperRange = Q3+ 1.5*IQR
+    val outlierCount=df.filter(col(fieldName)< lowerRange && col(fieldName)> upperRange).count()
+
+    df1.withColumn("range",concat_ws(" - ",col("min"),col("max")))
+        .withColumn("cv",col("std")/col("mean"))
+      .withColumn("IQR",lit(IQR))
+      .withColumn("outlierCount",lit(outlierCount))
+      //.collect().head.toSeq
+
+
+  }
+}
