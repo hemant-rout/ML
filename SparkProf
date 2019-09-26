@@ -91,7 +91,27 @@ object DataProfiling {
   }
 }
 
+def writeToExcel(df:DataFrame): Unit ={
 
+
+    df.show(10,false)
+    /*df.na.drop("any").coalesce(1).write
+      .format("com.crealytics.spark.excel")
+      .option("dataAddress", "'My Sheet2'!A1:B1000")
+      .option("useHeader", "true")
+      .option("addColorColumns", "false")
+      .option("dateFormat", "yy-mmm-d") // Optional, default: yy-m-d h:mm
+      .option("timestampFormat", "mm-dd-yyyy hh:mm:ss") // Optional, default: yyyy-mm-dd hh:mm:ss.000
+      .mode("append") // Optional, default: overwrite.
+      .save("C:\\Users\\Hemant\\GitHub\\SparkPractice\\data\\output\\Worktime2.xlsx")
+*/
+    df.na.drop("any").coalesce(1).write.excel(
+      useHeader = true,  // Required
+      dataAddress = "Myfile2[#All]",
+      timestampFormat = "MM-dd-yyyy hh:mm:ss"  // Optional, default: yyyy-mm-dd hh:mm:ss[.fffffffff]
+    ).mode("append").save("C:\\Users\\Hemant\\GitHub\\SparkPractice\\data\\output\\Worktime2.xlsx")
+  }
+}
 
 
 
