@@ -1,0 +1,8 @@
+//Vector value Extract 
+ val headValue = udf((arr: Vector) => arr.toArray)
+
+    val chi = ChiSquareTest.test(df, "features", "label").select("pValues")
+    val newDF=chi.select(headValue(col("pValues")).as("pValues")).withColumn("cname",lit("c"))
+      val newDF2=newDF.select(
+        col("*") +: (0 until 2).map(i => col("pValues").getItem(i).as(s"pValues$i")): _*
+        )
