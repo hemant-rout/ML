@@ -1,0 +1,37 @@
+package com.ml.code
+
+import org.apache.spark.sql.SparkSession
+
+object Visualization {
+  def main(args: Array[String]): Unit = {
+
+    val spark = SparkSession.builder().appName("sparkTest").config("spark.tmp.warehouse","file:///tmp").master("local").getOrCreate()
+    import spark.implicits._
+    val df= Seq(("USA",400),("UK",94),("DK",80)).toDF("country","population")
+    import vegas._
+    import vegas.sparkExt._
+
+
+
+//    val plot = Vegas("Country Pop").
+//      withData(
+//        Seq(
+//          Map("country" -> "USA", "population" -> 314),
+//          Map("country" -> "UK", "population" -> 64),
+//          Map("country" -> "DK", "population" -> 80)
+//        )
+//      )
+
+val plot = Vegas("Country Pop").withDataFrame(df).
+      encodeX("country", Nom).
+      encodeY("population", Quant).
+      mark(Bar)
+
+    //println(plot.html.pageHTML("Hi"))
+
+    //println(plot.html.frameHTML("foo"))
+
+    println(plot.html.pageHTML("Hi"))
+    println(plot.html.footerHTML)
+  }
+}
