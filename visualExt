@@ -1,0 +1,30 @@
+package com.ml.code
+
+import org.apache.spark.sql.DataFrame
+import vegas.DSL.DataDSL
+
+object visualExt {
+    val DefaultLimit = 10000
+
+    implicit class VegasSpark[T](val specBuilder: DataDSL[T]) {
+
+      def withDataFrame(df: DataFrame,fields:Array[String], limit: Int = DefaultLimit): T = {
+        val columns: Array[String] = df.columns.intersect(fields)
+        /*//val count: Double = df.count
+        val data = {
+          df.select(columns.head,columns.tail:_*).collect()
+          //if (count >= limit) df.sample(false, limit / count).collect() else df.collect()
+          }.map { row =>
+          columns.zipWithIndex.map { case (name: String, index: Int) =>
+            // We should be able to pass in the required columns into here, so we don't need
+            // to create a map containing all the columns.
+            val value = row.get(index)
+            name -> value
+          }.toMap
+        }*/
+        val data=df.select(columns.head,columns.tail:_*).collect().map(r=> columns.zip(r.toSeq).toMap)
+        specBuilder.withData(data)
+      }
+    }
+
+  }
