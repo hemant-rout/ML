@@ -22,7 +22,7 @@ object Visualization {
 //        )
 //      )
 
-val plot = Vegas("Country Pop").withDataFrame(df).
+val plot = Vegas("Country Pop").withDataFrame(df,Array("country","rank")).
       encodeX("country", Nom).
       encodeY("population", Quant).
       mark(Bar)
