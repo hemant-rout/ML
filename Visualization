@@ -9,8 +9,8 @@ object Visualization {
     import spark.implicits._
     val df= Seq(("USA",400),("UK",94),("DK",80)).toDF("country","population")
     import vegas._
-    import vegas.sparkExt._
-
+    //import vegas.sparkExt._
+    import visualExt._
 
 
 //    val plot = Vegas("Country Pop").
