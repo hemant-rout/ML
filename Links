@@ -90,3 +90,5 @@ https://docs.databricks.com/delta/delta-batch.html
 https://docs.microsoft.com/en-us/azure/databricks/delta/delta-batch
 https://www.programcreek.com/java-api-examples/?class=org.apache.commons.math3.stat.StatUtils&method=percentile
 https://gist.github.com/c-w/5cbf03f9578aaf45f4eb8c04664d24d1
+
+https://databricks.com/blog/2016/08/30/notebook-workflows-the-easiest-way-to-implement-apache-spark-pipelines.html
