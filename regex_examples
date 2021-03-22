@@ -1,0 +1,18 @@
+Amount extraction:
+
+import pandas as pd
+import re
+
+df = pd.DataFrame({"sms":["sada rs 120.5",
+                          "llllasd rs120.6",
+                          "rs 1,120.5 sdfsd",
+                          "fscc sfsc rs- 2,120.5",
+                          "45ads rs 21?20.5",
+                          "rasc rs* 21?20.5",
+                          "rs 320.5/- added",
+                          "rs420.5 added",
+                          "rs inr520.5 added"
+                         ]})
+                         
+df["amn"]=df["sms"].str.extract(r'(((rs|inr)[\s\*\-]*)((\d+[,\?\s\$]?\d+)+[.]?\d+))',expand=False)[3]
+df["amn"]=df.amn.str.replace(r'[,\?\s\$]','',regex=True)                    
